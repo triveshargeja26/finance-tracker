@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button } from "../../ui/button";
 import { Link } from "react-router-dom";
+import { toast } from "sonner";
 
 interface UserProps {
     username: string;
@@ -16,6 +17,28 @@ const Register: React.FC = () => {
     })
     const handleSubmit = (e: { preventDefault: () => void; }) => {
         e.preventDefault()
+
+        try {
+            localStorage.setItem("users", JSON.stringify(user))
+            const isRegistered = localStorage.getItem("users")
+
+            if (isRegistered) {
+                const parsedUser = JSON.parse(isRegistered)
+
+                const hasValidData = Object.values(parsedUser).some(value => value !== "" && value !== null && value !== undefined)
+
+                if (parsedUser && hasValidData) {
+                    toast.success("User registered successfully!")
+                } else {
+                    toast.error("Error: User details are empty. Registration failed.")
+                }
+            } else {
+                toast.error("Error: Registration failed. Please try again.")
+            }
+        } catch (error) {
+            toast.error("Error: Unable to register user. Please try again.")
+            console.error("Registration error:", error)
+        }
     }
     return (
         <div className="h-screen flex items-center justify-center">
@@ -27,9 +50,10 @@ const Register: React.FC = () => {
                         type="text"
                         name="username"
                         placeholder="Username"
-                        value={user.email}
+                        value={user.username}
                         onChange={(e) => setUser({ ...user, username: e.target.value })}
                         className="border px-2 border-gray-400 rounded-lg text-md py-1"
+                        required
                     />
                     <label htmlFor="email" className="font-medium text-lg">Email</label>
                     <input
@@ -48,12 +72,13 @@ const Register: React.FC = () => {
                         value={user.password}
                         onChange={(e) => setUser({ ...user, password: e.target.value })}
                         className="border px-2 border-gray-400 rounded-lg text-md py-1"
+                        required
 
                     />
                     <p>Already have account? <Link to={"/"} className="text-red-600 cursor-pointer">Login here</Link></p>
 
                 </div>
-                <Button type="submit" variant={"default"} className=" bg-blue-600 text-white w-32 cursor-pointer">Register</Button>
+                <Button type="submit" variant={"default"} className=" bg-[#34656D] text-white w-32 cursor-pointer">Register</Button>
             </form >
         </div >
     )

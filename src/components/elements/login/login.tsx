@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button } from "../../ui/button";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 interface UserProps {
     email: string;
@@ -12,8 +13,35 @@ const Login: React.FC = () => {
         email: "",
         password: ""
     })
+    const navigate = useNavigate();
+
     const handleSubmit = (e: { preventDefault: () => void; }) => {
         e.preventDefault()
+
+        try {
+            const userData = localStorage.getItem('users')
+
+            if (!userData) {
+                toast.error("No user registered. Please register first.")
+                return
+            }
+            const storedUser = JSON.parse(userData)
+            if (!user.email || !user.password || user.email === "" || user.password === "") {
+                toast.error("Please enter both email and password.")
+                return
+            }
+            if (storedUser.email === user.email && storedUser.password === user.password) {
+                toast.success("Login successfully! Redirecting to dashboard ...")
+                setTimeout(() => {
+                    navigate("/dashboard")
+                }, 1000)
+            } else {
+                toast.error("Invalid email or password. Please try again.")
+            }
+        } catch (error) {
+            toast.error("Error: Unable to login. Please try again.")
+            console.error("Login error:", error)
+        }
     }
     return (
         <div className="h-screen flex items-center justify-center">
@@ -41,7 +69,7 @@ const Login: React.FC = () => {
                     />
                     <p>Doesnt have account? <Link to={"/register"} className="text-red-600 cursor-pointer">Regsiter here</Link></p>
                 </div>
-                <Button type="submit" variant={"default"} className=" bg-blue-600 text-white w-32 cursor-pointer">Login</Button>
+                <Button type="submit" variant={"default"} className="bg-[#34656D] text-white w-32 cursor-pointer">Login</Button>
             </form >
         </div >
     )
